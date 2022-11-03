@@ -103,11 +103,23 @@ if __name__ == '__main__':
     device = torch.device("cpu" if args.cpu else "cuda")
     net = net.to(device)
 
-    # testing begin
-    for i in range(1):
-        image_path = "./data/face_detections/blazefacev3/docs/img/sample1.jpg"
+    # loading video or cap camera
+    # cap_device = args.device
+    # cap = cv2.VideoCapture(cap_device, cv2.CAP_DSHOW)
+    video_path = 'test_video.mp4'
+    cap = cv2.VideoCapture(video_path)
+    ret, frame = cap.read()
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    out = cv2.VideoWriter('result.avi', fourcc, 30, (frame.shape[1], frame.shape[0]))
 
-        img_raw = cv2.imread(image_path, cv2.IMREAD_COLOR)
+    # testing begin
+    while True:
+        ret, frame = cap.read()
+
+        # image_path = "docs/img/sample1.jpg"
+        img_raw = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        # img_raw = cv2.imread(image_path, cv2.IMREAD_COLOR)
         img = np.float32(img_raw)
 
         # testing scale
@@ -202,6 +214,16 @@ if __name__ == '__main__':
 
             print("face num:", len(face_det_list))
             name = "test1.jpg"
-            infer_image_path = os.path.join(os.path.split(image_path)[0], name)
-            cv2.imwrite(infer_image_path, img_raw)
+            # infer_image_path = os.path.join(os.path.split(image_path)[0], name)
+            # cv2.imwrite(infer_image_path, img_raw)
+            result = cv2.cvtColor(img_raw, cv2.COLOR_BGR2RGB)
+            cv2.imshow('output',result)
+            out.write(result)
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord("q"):
+            break
+
+    # cleanup
+    cap.release()
+    cv2.destroyAllWindows()
 
